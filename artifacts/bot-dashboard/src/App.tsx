@@ -22,8 +22,12 @@ function usePulse() {
 
 export default function App() {
   const pulse = usePulse();
-  const { data: stats, isLoading: statsLoading } = useGetBotStats();
-  const { data: rawCommands, isLoading: cmdsLoading } = useGetBotCommands();
+  const { data: stats, isLoading: statsLoading } = useGetBotStats(
+    { query: { refetchInterval: 30_000, staleTime: 0 } }
+  );
+  const { data: rawCommands, isLoading: cmdsLoading, dataUpdatedAt } = useGetBotCommands(
+    { query: { refetchInterval: 30_000, staleTime: 0 } }
+  );
 
   const online = stats?.online ?? false;
   const serverCount = stats?.serverCount ?? 0;
@@ -148,8 +152,11 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="text-center text-[#72767d] text-xs py-6">
-        Scary Juan Bot • Running 24/7
+      <footer className="text-center text-[#72767d] text-xs py-6 space-y-1">
+        <p>Scary Juan Bot • Running 24/7</p>
+        {dataUpdatedAt > 0 && (
+          <p>Commands last synced: {new Date(dataUpdatedAt).toLocaleTimeString()}</p>
+        )}
       </footer>
     </div>
   );
