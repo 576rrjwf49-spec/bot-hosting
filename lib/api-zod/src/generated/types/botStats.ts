@@ -5,9 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface BotStats {
   /** Number of servers the bot is in */
@@ -21,4 +18,3 @@ export interface BotStats {
   /** Total number of slash commands */
   commandCount: number;
 }
-

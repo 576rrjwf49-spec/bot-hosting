@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: bot
+    description: Discord bot operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /bot-stats:
+    get:
+      operationId: getBotStats
+      tags: [bot]
+      summary: Get bot statistics
+      description: Returns live Discord bot stats including server count
+      responses:
+        "200":
+          description: Bot statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStats"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +48,27 @@ components:
           type: string
       required:
         - status
-
+    BotStats:
+      type: object
+      properties:
+        serverCount:
+          type: integer
+          description: Number of servers the bot is in
+        botName:
+          type: string
+          description: Bot username
+        botTag:
+          type: string
+          description: Bot username with discriminator
+        online:
+          type: boolean
+          description: Whether the bot is online
+        commandCount:
+          type: integer
+          description: Total number of slash commands
+      required:
+        - serverCount
+        - botName
+        - botTag
+        - online
+        - commandCount

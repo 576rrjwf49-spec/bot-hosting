@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useGetBotStats } from "@workspace/api-client-react";
 
 const COMMANDS = [
   { category: "🎵 Music", commands: ["/play", "/skip", "/stop", "/pause", "/resume", "/queue", "/nowplaying"] },
@@ -9,8 +10,6 @@ const COMMANDS = [
   { category: "🔧 Admin", commands: ["/givexp", "/setwelcome", "/setcommands", "/setannounce"] },
   { category: "📋 General", commands: ["/help"] },
 ];
-
-const TOTAL_COMMANDS = COMMANDS.reduce((sum, c) => sum + c.commands.length, 0);
 
 function usePulse() {
   const [on, setOn] = useState(true);
@@ -23,6 +22,12 @@ function usePulse() {
 
 export default function App() {
   const pulse = usePulse();
+  const { data: stats, isLoading } = useGetBotStats();
+
+  const online = stats?.online ?? false;
+  const serverCount = stats?.serverCount ?? 0;
+  const botName = stats?.botName ?? "Scary Juan";
+  const commandCount = stats?.commandCount ?? 25;
 
   return (
     <div className="min-h-screen bg-[#23272a] text-white font-sans">
@@ -33,18 +38,28 @@ export default function App() {
             SJ
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Scary Juan</h1>
+            <h1 className="text-2xl font-bold text-white">{botName}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span
-                className="w-2.5 h-2.5 rounded-full bg-green-400 transition-opacity duration-700"
-                style={{ opacity: pulse ? 1 : 0.4 }}
-              />
-              <span className="text-green-400 text-sm font-medium">Online</span>
+              {isLoading ? (
+                <span className="text-[#b9bbbe] text-sm">Connecting…</span>
+              ) : (
+                <>
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full transition-opacity duration-700 ${online ? "bg-green-400" : "bg-red-400"}`}
+                    style={{ opacity: online ? (pulse ? 1 : 0.4) : 1 }}
+                  />
+                  <span className={`text-sm font-medium ${online ? "text-green-400" : "text-red-400"}`}>
+                    {online ? "Online" : "Offline"}
+                  </span>
+                </>
+              )}
             </div>
           </div>
           <div className="ml-auto text-right hidden sm:block">
-            <p className="text-[#b9bbbe] text-sm">Total Commands</p>
-            <p className="text-3xl font-bold text-[#5865f2]">{TOTAL_COMMANDS}</p>
+            <p className="text-[#b9bbbe] text-sm">Servers</p>
+            <p className="text-3xl font-bold text-[#5865f2]">
+              {isLoading ? "—" : serverCount}
+            </p>
           </div>
         </div>
       </header>
@@ -54,9 +69,9 @@ export default function App() {
         {/* Quick stats */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Music", value: "7 cmds", icon: "🎵" },
+            { label: "Servers", value: isLoading ? "—" : String(serverCount), icon: "🌐" },
+            { label: "Commands", value: isLoading ? "—" : String(commandCount), icon: "⚡" },
             { label: "XP System", value: "Active", icon: "⭐" },
-            { label: "Games", value: "2 cmds", icon: "🎮" },
             { label: "Help", value: "Auto-updating", icon: "📋" },
           ].map((s) => (
             <div key={s.label} className="bg-[#2c2f33] rounded-xl p-4 border border-[#1e2124]">
