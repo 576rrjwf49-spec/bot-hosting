@@ -30,3 +30,15 @@ export const GetBotStatsResponse = zod.object({
 })
 
 
+/**
+ * Returns the live list of slash commands grouped by category
+ * @summary Get all bot commands
+ */
+export const GetBotCommandsResponseItem = zod.object({
+  "name": zod.string().describe('Slash command name'),
+  "description": zod.string().describe('Command description'),
+  "category": zod.string().describe('Category the command belongs to')
+})
+export const GetBotCommandsResponse = zod.array(GetBotCommandsResponseItem)
+
+

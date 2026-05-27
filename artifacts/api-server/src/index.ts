@@ -27,23 +27,19 @@ app.listen(port, (err) => {
 
 // Launch the Discord bot as a side process when the token is available
 if (process.env.DISCORD_TOKEN) {
-  const bot = spawn(
-    "pnpm",
-    ["--filter", "@workspace/discord-bot", "run", "start"],
-    {
+  // Strip PORT so the bot's health server doesn't clash with the API server
+  const { PORT: _omit, ...botEnv } = process.env;
+  const spawnBot = () =>
+    spawn("pnpm", ["--filter", "@workspace/discord-bot", "run", "start"], {
       stdio: "inherit",
-      env: { ...process.env },
-    }
-  );
+      env: { ...botEnv, BOT_HEALTH_PORT: "8082" },
+    });
+
+  const bot = spawnBot();
 
   bot.on("exit", (code) => {
     logger.warn({ code }, "Discord bot process exited — restarting in 5s");
-    setTimeout(() => {
-      spawn("pnpm", ["--filter", "@workspace/discord-bot", "run", "start"], {
-        stdio: "inherit",
-        env: { ...process.env },
-      });
-    }, 5000);
+    setTimeout(spawnBot, 5000);
   });
 
   logger.info("Discord bot process started");

@@ -16,6 +16,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BotCommand,
   BotStats,
   HealthStatus
 } from './api.schemas';
@@ -176,6 +177,84 @@ export function useGetBotStats<TData = Awaited<ReturnType<typeof getBotStats>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetBotStatsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetBotCommandsUrl = () => {
+
+
+
+
+  return `/api/bot-commands`
+}
+
+/**
+ * Returns the live list of slash commands grouped by category
+ * @summary Get all bot commands
+ */
+export const getBotCommands = async ( options?: RequestInit): Promise<BotCommand[]> => {
+
+  return customFetch<BotCommand[]>(getGetBotCommandsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBotCommandsQueryKey = () => {
+    return [
+    `/api/bot-commands`
+    ] as const;
+    }
+
+
+export const getGetBotCommandsQueryOptions = <TData = Awaited<ReturnType<typeof getBotCommands>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBotCommands>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBotCommandsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBotCommands>>> = ({ signal }) => getBotCommands({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBotCommands>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBotCommandsQueryResult = NonNullable<Awaited<ReturnType<typeof getBotCommands>>>
+export type GetBotCommandsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all bot commands
+ */
+
+export function useGetBotCommands<TData = Awaited<ReturnType<typeof getBotCommands>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBotCommands>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBotCommandsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

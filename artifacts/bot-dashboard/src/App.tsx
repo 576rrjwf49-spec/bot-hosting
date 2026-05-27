@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { useGetBotStats } from "@workspace/api-client-react";
+import { useGetBotStats, useGetBotCommands } from "@workspace/api-client-react";
 
-const COMMANDS = [
-  { category: "🎵 Music", commands: ["/play", "/skip", "/stop", "/pause", "/resume", "/queue", "/nowplaying"] },
-  { category: "🖼️ GIFs & Video", commands: ["/gif", "/giphy", "/video", "/watch"] },
-  { category: "🤖 AI & Info", commands: ["/ask", "/lyrics", "/boost", "/status"] },
-  { category: "🎮 Games", commands: ["/poll", "/truthordare"] },
-  { category: "⭐ XP System", commands: ["/level", "/leaderboard", "/roles"] },
-  { category: "🔧 Admin", commands: ["/givexp", "/setwelcome", "/setcommands", "/setannounce"] },
-  { category: "📋 General", commands: ["/help"] },
-];
+const CATEGORY_ICONS: Record<string, string> = {
+  "Music": "🎵",
+  "GIFs & Video": "🖼️",
+  "AI & Info": "🤖",
+  "Games": "🎮",
+  "XP System": "⭐",
+  "Admin": "🔧",
+  "General": "📋",
+};
 
 function usePulse() {
   const [on, setOn] = useState(true);
@@ -22,12 +22,25 @@ function usePulse() {
 
 export default function App() {
   const pulse = usePulse();
-  const { data: stats, isLoading } = useGetBotStats();
+  const { data: stats, isLoading: statsLoading } = useGetBotStats();
+  const { data: rawCommands, isLoading: cmdsLoading } = useGetBotCommands();
 
   const online = stats?.online ?? false;
   const serverCount = stats?.serverCount ?? 0;
   const botName = stats?.botName ?? "Scary Juan";
-  const commandCount = stats?.commandCount ?? 25;
+
+  // Group commands by category, preserving insertion order
+  const categories = rawCommands
+    ? Object.entries(
+        rawCommands.reduce<Record<string, string[]>>((acc, cmd) => {
+          if (!acc[cmd.category]) acc[cmd.category] = [];
+          acc[cmd.category].push(`/${cmd.name}`);
+          return acc;
+        }, {})
+      )
+    : [];
+
+  const commandCount = rawCommands?.length ?? 0;
 
   return (
     <div className="min-h-screen bg-[#23272a] text-white font-sans">
@@ -40,7 +53,7 @@ export default function App() {
           <div>
             <h1 className="text-2xl font-bold text-white">{botName}</h1>
             <div className="flex items-center gap-2 mt-1">
-              {isLoading ? (
+              {statsLoading ? (
                 <span className="text-[#b9bbbe] text-sm">Connecting…</span>
               ) : (
                 <>
@@ -58,7 +71,7 @@ export default function App() {
           <div className="ml-auto text-right hidden sm:block">
             <p className="text-[#b9bbbe] text-sm">Servers</p>
             <p className="text-3xl font-bold text-[#5865f2]">
-              {isLoading ? "—" : serverCount}
+              {statsLoading ? "—" : serverCount}
             </p>
           </div>
         </div>
@@ -69,8 +82,8 @@ export default function App() {
         {/* Quick stats */}
         <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Servers", value: isLoading ? "—" : String(serverCount), icon: "🌐" },
-            { label: "Commands", value: isLoading ? "—" : String(commandCount), icon: "⚡" },
+            { label: "Servers", value: statsLoading ? "—" : String(serverCount), icon: "🌐" },
+            { label: "Commands", value: cmdsLoading ? "—" : String(commandCount), icon: "⚡" },
             { label: "XP System", value: "Active", icon: "⭐" },
             { label: "Help", value: "Auto-updating", icon: "📋" },
           ].map((s) => (
@@ -85,23 +98,41 @@ export default function App() {
         {/* Commands */}
         <section>
           <h2 className="text-xl font-bold mb-4 text-[#dcddde]">All Commands</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            {COMMANDS.map((cat) => (
-              <div key={cat.category} className="bg-[#2c2f33] rounded-xl p-5 border border-[#1e2124]">
-                <h3 className="font-bold text-white mb-3">{cat.category}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {cat.commands.map((cmd) => (
-                    <span
-                      key={cmd}
-                      className="bg-[#40444b] text-[#dcddde] text-xs font-mono px-2 py-1 rounded"
-                    >
-                      {cmd}
-                    </span>
-                  ))}
+
+          {cmdsLoading ? (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-[#2c2f33] rounded-xl p-5 border border-[#1e2124] animate-pulse">
+                  <div className="h-4 w-24 bg-[#40444b] rounded mb-3" />
+                  <div className="flex gap-2 flex-wrap">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="h-5 w-16 bg-[#40444b] rounded" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {categories.map(([category, commands]) => (
+                <div key={category} className="bg-[#2c2f33] rounded-xl p-5 border border-[#1e2124]">
+                  <h3 className="font-bold text-white mb-3">
+                    {CATEGORY_ICONS[category] ?? "💬"} {category}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {commands.map((cmd) => (
+                      <span
+                        key={cmd}
+                        className="bg-[#40444b] text-[#dcddde] text-xs font-mono px-2 py-1 rounded"
+                      >
+                        {cmd}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* How to use */}

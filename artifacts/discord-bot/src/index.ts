@@ -1,8 +1,22 @@
 import { createServer } from "http";
+import { writeFileSync } from "fs";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import { onReady } from "./events/ready.js";
 import { onInteractionCreate } from "./events/interactionCreate.js";
 import { onMessageCreate, onGuildMemberAdd } from "./events/messageCreate.js";
+import { allCommands } from "./commands/index.js";
+
+// Write command manifest so the dashboard can display live commands
+try {
+  const manifest = allCommands.map((cmd) => ({
+    name: cmd.data.name,
+    description: (cmd.data as { description?: string }).description ?? "",
+    category: cmd.category,
+  }));
+  writeFileSync("/tmp/bot-commands.json", JSON.stringify(manifest), "utf-8");
+} catch {
+  console.error("⚠️  Could not write command manifest");
+}
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) {
@@ -10,8 +24,8 @@ if (!token) {
   process.exit(1);
 }
 
-// Tiny health-check server so Replit deployment can verify the process is alive
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8081;
+// Tiny health-check server — uses BOT_HEALTH_PORT so it never clashes with the API server's PORT
+const PORT = process.env.BOT_HEALTH_PORT ? parseInt(process.env.BOT_HEALTH_PORT) : 8082;
 createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
   res.end(JSON.stringify({ status: "ok", bot: client.user?.tag ?? "connecting" }));

@@ -39,6 +39,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BotStats"
+  /bot-commands:
+    get:
+      operationId: getBotCommands
+      tags: [bot]
+      summary: Get all bot commands
+      description: Returns the live list of slash commands grouped by category
+      responses:
+        "200":
+          description: Command list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BotCommand"
 components:
   schemas:
     HealthStatus:
@@ -72,3 +87,19 @@ components:
         - botTag
         - online
         - commandCount
+    BotCommand:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Slash command name
+        description:
+          type: string
+          description: Command description
+        category:
+          type: string
+          description: Category the command belongs to
+      required:
+        - name
+        - description
+        - category
