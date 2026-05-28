@@ -60,29 +60,28 @@ if (process.env.DISCORD_TOKEN) {
   currentBot = spawnBot();
   logger.info("Discord bot process started");
 
-  // ── Hourly scheduled restart starting at 1:00 PM ─────────────────────────
+  // ── Hourly scheduled restart starting at 1:00 PM AEST (UTC+10 = 03:00 UTC) ─
+  const START_HOUR_UTC = 3; // 13:00 AEST = 03:00 UTC
+
   function msUntilNextRestart(): number {
     const now = new Date();
-    const target = new Date(now);
 
-    // Aim for the next top-of-hour that is at or after 1:00 PM
+    // Next top-of-hour at or after START_HOUR_UTC
     const candidate = new Date(now);
-    candidate.setMinutes(0, 0, 0);
-    candidate.setHours(candidate.getHours() + 1); // next full hour
+    candidate.setUTCMinutes(0, 0, 0);
+    candidate.setUTCHours(candidate.getUTCHours() + 1); // next full UTC hour
 
-    // If that's before 1 PM, jump straight to 1:00 PM today
-    if (candidate.getHours() < 13) {
-      target.setHours(13, 0, 0, 0);
-    } else {
-      target.setTime(candidate.getTime());
+    // If that hour is before the start hour, jump straight to start hour today
+    if (candidate.getUTCHours() < START_HOUR_UTC) {
+      candidate.setUTCHours(START_HOUR_UTC, 0, 0, 0);
     }
 
-    // If we're already past that target, move to 1:00 PM today or bump one hour
-    if (target <= now) {
-      target.setHours(target.getHours() + 1, 0, 0, 0);
+    // If still in the past, bump one hour
+    if (candidate <= now) {
+      candidate.setUTCHours(candidate.getUTCHours() + 1, 0, 0, 0);
     }
 
-    return target.getTime() - now.getTime();
+    return candidate.getTime() - now.getTime();
   }
 
   function scheduleNext() {
