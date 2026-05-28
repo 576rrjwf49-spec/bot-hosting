@@ -85,4 +85,10 @@ client.on("messageCreate",     (message)     => onMessageCreate(message, client)
 client.on("guildMemberAdd",    (member)      => onGuildMemberAdd(member, client));
 client.on("error",             (err)         => console.error("Discord client error:", err));
 
-client.login(token);
+console.log("TOKEN EXISTS:", !!token);
+console.log("TOKEN LENGTH:", token?.length);
+console.log("STARTING LOGIN...");
+
+client.login(token)
+  .then(() => console.log("LOGIN SUCCESS"))
+  .catch((err) => console.error("LOGIN FAILED:", err));
