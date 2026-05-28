@@ -33,6 +33,19 @@ import { givexpCommand } from "./admin/givexp.js";
 import { setwelcomeCommand } from "./admin/setwelcome.js";
 import { setcommandsCommand } from "./admin/setcommands.js";
 import { setannounceCommand } from "./admin/setannounce.js";
+// Security
+import { warnCommand } from "./security/warn.js";
+import { warningsCommand } from "./security/warnings.js";
+import { clearwarningsCommand } from "./security/clearwarnings.js";
+import { kickCommand } from "./security/kick.js";
+import { banCommand } from "./security/ban.js";
+import { unbanCommand } from "./security/unban.js";
+import { timeoutCommand } from "./security/timeout.js";
+import { purgeCommand } from "./security/purge.js";
+import { lockCommand } from "./security/lock.js";
+import { unlockCommand } from "./security/unlock.js";
+import { slowmodeCommand } from "./security/slowmode.js";
+import { userinfoCommand } from "./security/userinfo.js";
 
 // ─── Registry — add new commands to this array and they appear in /help ──────
 export const allCommands: Command[] = [
@@ -67,6 +80,19 @@ export const allCommands: Command[] = [
   setwelcomeCommand,
   setcommandsCommand,
   setannounceCommand,
+  // Security
+  warnCommand,
+  warningsCommand,
+  clearwarningsCommand,
+  kickCommand,
+  banCommand,
+  unbanCommand,
+  timeoutCommand,
+  purgeCommand,
+  lockCommand,
+  unlockCommand,
+  slowmodeCommand,
+  userinfoCommand,
 ];
 
 export const commandMap = new Map<string, Command>(

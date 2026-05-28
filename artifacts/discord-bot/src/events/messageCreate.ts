@@ -25,7 +25,7 @@ export async function onMessageCreate(message: Message, client: Client): Promise
   if (!result?.leveled) return;
 
   // Announce level-up
-  await message.channel
+  await (message.channel as TextChannel)
     .send(`🎉 Congrats ${message.author}, you reached **Level ${result.newLevel}**!`)
     .catch(() => null);
 

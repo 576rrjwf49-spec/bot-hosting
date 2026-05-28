@@ -35,7 +35,7 @@ export const playCommand: Command = {
       const connection = joinVoiceChannel({
         channelId: voiceChannel.id,
         guildId: interaction.guildId!,
-        adapterCreator: interaction.guild!.voiceAdapterCreator,
+        adapterCreator: interaction.guild!.voiceAdapterCreator as any,
       });
       queue = createQueue(interaction.guildId!, connection);
     }

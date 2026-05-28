@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { useGetBotStats, useGetBotCommands, useGetLeaderboard } from "@workspace/api-client-react";
+import {
+  useGetBotStats,
+  useGetBotCommands,
+  useGetLeaderboard,
+  getGetBotStatsQueryKey,
+  getGetBotCommandsQueryKey,
+  getGetLeaderboardQueryKey,
+} from "@workspace/api-client-react";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "Music": "🎵",
@@ -25,13 +32,13 @@ function usePulse() {
 export default function App() {
   const pulse = usePulse();
   const { data: stats, isLoading: statsLoading } = useGetBotStats(
-    { query: { refetchInterval: 30_000, staleTime: 0 } }
+    { query: { queryKey: getGetBotStatsQueryKey(), refetchInterval: 30_000, staleTime: 0 } }
   );
   const { data: rawCommands, isLoading: cmdsLoading, dataUpdatedAt } = useGetBotCommands(
-    { query: { refetchInterval: 30_000, staleTime: 0 } }
+    { query: { queryKey: getGetBotCommandsQueryKey(), refetchInterval: 30_000, staleTime: 0 } }
   );
   const { data: leaderboard, isLoading: lbLoading } = useGetLeaderboard(
-    { query: { refetchInterval: 60_000, staleTime: 0 } }
+    { query: { queryKey: getGetLeaderboardQueryKey(), refetchInterval: 60_000, staleTime: 0 } }
   );
 
   const online = stats?.online ?? false;

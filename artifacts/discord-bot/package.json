@@ -13,13 +13,14 @@
     "@workspace/db": "workspace:*",
     "discord.js": "^14.16.0",
     "drizzle-orm": "catalog:",
+    "node-fetch": "^3.3.2",
     "opusscript": "^0.0.8",
     "pg": "^8.20.0",
-    "play-dl": "^1.9.7",
-    "node-fetch": "^3.3.2"
+    "play-dl": "^1.9.7"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.20.0",
     "tsx": "catalog:",
     "typescript": "^5.8.3"
   }

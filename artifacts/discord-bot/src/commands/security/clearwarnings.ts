@@ -21,7 +21,7 @@ export const clearwarningsCommand: Command = {
     const target = interaction.options.getUser("user", true);
     const guildId = interaction.guildId!;
 
-    const result = await db
+    await db
       .delete(warningsTable)
       .where(and(eq(warningsTable.userId, target.id), eq(warningsTable.guildId, guildId)));
 
