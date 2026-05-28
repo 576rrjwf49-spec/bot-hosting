@@ -76,6 +76,9 @@ function scheduleAutoDoubleXp() {
 }
 
 client.once("ready", () => {
+  console.log("BOT IS READY");
+  console.log(`LOGGED IN AS: ${client.user?.tag}`);
+
   onReady(client);
   scheduleAutoDoubleXp();
 });
