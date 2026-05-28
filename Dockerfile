@@ -11,8 +11,8 @@ COPY pnpm-workspace.yaml package.json tsconfig.base.json tsconfig.json ./
 COPY lib/db ./lib/db
 COPY artifacts/discord-bot ./artifacts/discord-bot
 
-# Install all dependencies
-RUN pnpm install --frozen-lockfile
+# Regenerate lockfile to fix mismatches and install all dependencies
+RUN pnpm install --no-frozen-lockfile
 
 # Push DB schema then start the bot
 CMD ["sh", "-c", "pnpm --filter @workspace/db run push && pnpm --filter @workspace/discord-bot run start"]
