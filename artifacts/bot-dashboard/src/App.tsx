@@ -19,6 +19,54 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 const MEDALS = ["🥇", "🥈", "🥉"];
+const START_HOUR_UTC = 3; // 1 PM AEST = 03:00 UTC
+
+function getNextRestartDate(): Date {
+  const now = new Date();
+  const candidate = new Date(now);
+  candidate.setUTCMinutes(0, 0, 0);
+  candidate.setUTCHours(candidate.getUTCHours() + 1);
+  if (candidate.getUTCHours() < START_HOUR_UTC) {
+    candidate.setUTCHours(START_HOUR_UTC, 0, 0, 0);
+  }
+  if (candidate <= now) {
+    candidate.setUTCHours(candidate.getUTCHours() + 1, 0, 0, 0);
+  }
+  return candidate;
+}
+
+function formatCountdown(ms: number): string {
+  const totalSecs = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(totalSecs / 3600);
+  const m = Math.floor((totalSecs % 3600) / 60);
+  const s = totalSecs % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+function useRestartCountdown() {
+  const [next, setNext] = useState<Date>(getNextRestartDate);
+  const [msLeft, setMsLeft] = useState(() => next.getTime() - Date.now());
+
+  useEffect(() => {
+    const tick = () => {
+      const now = Date.now();
+      const diff = next.getTime() - now;
+      if (diff <= 0) {
+        const newNext = getNextRestartDate();
+        setNext(newNext);
+        setMsLeft(newNext.getTime() - now);
+      } else {
+        setMsLeft(diff);
+      }
+    };
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, [next]);
+
+  return { countdown: formatCountdown(msLeft), nextDate: next, msLeft };
+}
 
 function usePulse() {
   const [on, setOn] = useState(true);
@@ -31,6 +79,7 @@ function usePulse() {
 
 export default function App() {
   const pulse = usePulse();
+  const { countdown, nextDate, msLeft } = useRestartCountdown();
   const { data: stats, isLoading: statsLoading } = useGetBotStats(
     { query: { queryKey: getGetBotStatsQueryKey(), refetchInterval: 30_000, staleTime: 0 } }
   );
@@ -108,6 +157,63 @@ export default function App() {
               <div className="text-[#b9bbbe] text-xs mt-0.5">{s.label}</div>
             </div>
           ))}
+        </section>
+
+        {/* Next Restart countdown */}
+        <section className="bg-[#2c2f33] rounded-xl border border-[#1e2124] p-5">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🔄</span>
+              <div>
+                <p className="text-[#b9bbbe] text-xs uppercase tracking-wide font-semibold mb-0.5">
+                  Next Scheduled Restart
+                </p>
+                <p className="text-white font-mono text-sm">
+                  {nextDate.toLocaleTimeString("en-AU", {
+                    timeZone: "Australia/Sydney",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}{" "}
+                  AEST &nbsp;·&nbsp;{" "}
+                  {nextDate.toLocaleTimeString("en-GB", {
+                    timeZone: "UTC",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}{" "}
+                  UTC
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p
+                className={`font-mono font-bold text-2xl tabular-nums transition-colors ${
+                  msLeft < 5 * 60_000
+                    ? "text-red-400"
+                    : msLeft < 15 * 60_000
+                    ? "text-yellow-400"
+                    : "text-[#5865f2]"
+                }`}
+              >
+                {countdown}
+              </p>
+              <p className="text-[#72767d] text-xs">until restart</p>
+            </div>
+          </div>
+          {/* Progress bar — fills as we approach the restart */}
+          <div className="mt-4 h-1.5 bg-[#1e2124] rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ${
+                msLeft < 5 * 60_000
+                  ? "bg-red-400"
+                  : msLeft < 15 * 60_000
+                  ? "bg-yellow-400"
+                  : "bg-[#5865f2]"
+              }`}
+              style={{ width: `${Math.min(100, 100 - (msLeft / 3_600_000) * 100)}%` }}
+            />
+          </div>
         </section>
 
         {/* Leaderboard */}
