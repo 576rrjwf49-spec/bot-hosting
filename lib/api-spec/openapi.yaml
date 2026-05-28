@@ -117,6 +117,8 @@ components:
           type: integer
         userId:
           type: string
+        username:
+          type: string
         guildId:
           type: string
         level:
@@ -126,6 +128,7 @@ components:
       required:
         - rank
         - userId
+        - username
         - guildId
         - level
         - xp

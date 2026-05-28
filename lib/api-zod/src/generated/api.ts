@@ -49,6 +49,7 @@ export const GetBotCommandsResponse = zod.array(GetBotCommandsResponseItem)
 export const GetLeaderboardResponseItem = zod.object({
   "rank": zod.number(),
   "userId": zod.string(),
+  "username": zod.string(),
   "guildId": zod.string(),
   "level": zod.number(),
   "xp": zod.number()

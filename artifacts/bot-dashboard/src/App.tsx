@@ -242,8 +242,8 @@ export default function App() {
                       {MEDALS[entry.rank - 1] ?? `#${entry.rank}`}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-mono text-sm truncate">
-                        {entry.userId}
+                      <p className="text-white font-semibold text-sm truncate">
+                        {entry.username}
                       </p>
                       <p className="text-[#72767d] text-xs">Level {entry.level}</p>
                     </div>

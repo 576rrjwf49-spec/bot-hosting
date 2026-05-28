@@ -9,6 +9,7 @@
 export interface LeaderboardEntry {
   rank: number;
   userId: string;
+  username: string;
   guildId: string;
   level: number;
   xp: number;
