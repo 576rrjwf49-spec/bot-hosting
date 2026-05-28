@@ -5,6 +5,12 @@ import { onReady } from "./events/ready.js";
 import { onInteractionCreate } from "./events/interactionCreate.js";
 import { onMessageCreate, onGuildMemberAdd } from "./events/messageCreate.js";
 import { allCommands } from "./commands/index.js";
+import {
+  activateDoubleXp,
+  deactivateDoubleXp,
+  isDoubleXpActive,
+  announceDoubleXp,
+} from "./lib/doubleXp.js";
 
 // Write command manifest so the dashboard can display live commands
 try {
@@ -24,7 +30,7 @@ if (!token) {
   process.exit(1);
 }
 
-// Tiny health-check server — uses BOT_HEALTH_PORT so it never clashes with the API server's PORT
+// Tiny health-check server
 const PORT = process.env.BOT_HEALTH_PORT ? parseInt(process.env.BOT_HEALTH_PORT) : 8082;
 createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -42,11 +48,40 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-client.once("ready", () => onReady(client));
-client.on("interactionCreate", (interaction) => onInteractionCreate(interaction, client));
-client.on("messageCreate", (message) => onMessageCreate(message, client));
-client.on("guildMemberAdd", (member) => onGuildMemberAdd(member, client));
+// ── Auto Double XP scheduler — fires every 3 hours, runs for 30 minutes ───────
+function scheduleAutoDoubleXp() {
+  const INTERVAL_MS   = 3 * 60 * 60_000; // every 3 hours
+  const DURATION_MIN  = 30;
+  const DURATION_MS   = DURATION_MIN * 60_000;
 
-client.on("error", (err) => console.error("Discord client error:", err));
+  async function runEvent() {
+    console.log("🌟 Auto Double XP event starting");
+    activateDoubleXp(DURATION_MS);
+    await announceDoubleXp(client, true, DURATION_MIN);
+
+    // End the event after the duration
+    setTimeout(async () => {
+      if (isDoubleXpActive()) {
+        deactivateDoubleXp();
+        await announceDoubleXp(client, false);
+        console.log("🌟 Auto Double XP event ended");
+      }
+    }, DURATION_MS);
+  }
+
+  // First event fires 3 hours after bot starts, then every 3 hours
+  setInterval(runEvent, INTERVAL_MS);
+  console.log(`🌟 Auto Double XP scheduler active — events every 3 hours for ${DURATION_MIN} min`);
+}
+
+client.once("ready", () => {
+  onReady(client);
+  scheduleAutoDoubleXp();
+});
+
+client.on("interactionCreate", (interaction) => onInteractionCreate(interaction, client));
+client.on("messageCreate",     (message)     => onMessageCreate(message, client));
+client.on("guildMemberAdd",    (member)      => onGuildMemberAdd(member, client));
+client.on("error",             (err)         => console.error("Discord client error:", err));
 
 client.login(token);
