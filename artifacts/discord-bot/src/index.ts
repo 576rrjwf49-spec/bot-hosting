@@ -24,7 +24,7 @@ try {
   console.error("⚠️  Could not write command manifest");
 }
 
-const token = process.env.DISCORD_TOKEN;
+const token = "MTUwODc2OTEzMTU0MzkyNDc4Nw.GSgLI6.EozkfBE1rxLZiSnD1VCtSl2q3RcQhUaqy_R-_0";
 if (!token) {
   console.error("❌ DISCORD_TOKEN is not set. Add it to your secrets.");
   process.exit(1);
