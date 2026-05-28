@@ -7,10 +7,7 @@
  */
 
 export interface BotCommand {
-  /** Slash command name */
   name: string;
-  /** Command description */
   description: string;
-  /** Category the command belongs to */
   category: string;
 }

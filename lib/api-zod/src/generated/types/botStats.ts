@@ -7,14 +7,9 @@
  */
 
 export interface BotStats {
-  /** Number of servers the bot is in */
   serverCount: number;
-  /** Bot username */
   botName: string;
-  /** Bot username with discriminator */
   botTag: string;
-  /** Whether the bot is online */
   online: boolean;
-  /** Total number of slash commands */
   commandCount: number;
 }

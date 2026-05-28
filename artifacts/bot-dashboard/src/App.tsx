@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useGetBotStats, useGetBotCommands } from "@workspace/api-client-react";
+import { useGetBotStats, useGetBotCommands, useGetLeaderboard } from "@workspace/api-client-react";
 
 const CATEGORY_ICONS: Record<string, string> = {
   "Music": "🎵",
@@ -10,6 +10,8 @@ const CATEGORY_ICONS: Record<string, string> = {
   "Admin": "🔧",
   "General": "📋",
 };
+
+const MEDALS = ["🥇", "🥈", "🥉"];
 
 function usePulse() {
   const [on, setOn] = useState(true);
@@ -28,12 +30,14 @@ export default function App() {
   const { data: rawCommands, isLoading: cmdsLoading, dataUpdatedAt } = useGetBotCommands(
     { query: { refetchInterval: 30_000, staleTime: 0 } }
   );
+  const { data: leaderboard, isLoading: lbLoading } = useGetLeaderboard(
+    { query: { refetchInterval: 60_000, staleTime: 0 } }
+  );
 
   const online = stats?.online ?? false;
   const serverCount = stats?.serverCount ?? 0;
   const botName = stats?.botName ?? "Scary Juan";
 
-  // Group commands by category, preserving insertion order
   const categories = rawCommands
     ? Object.entries(
         rawCommands.reduce<Record<string, string[]>>((acc, cmd) => {
@@ -99,10 +103,50 @@ export default function App() {
           ))}
         </section>
 
+        {/* Leaderboard */}
+        <section>
+          <h2 className="text-xl font-bold mb-4 text-[#dcddde]">🏆 XP Leaderboard</h2>
+          <div className="bg-[#2c2f33] rounded-xl border border-[#1e2124] overflow-hidden">
+            {lbLoading ? (
+              <div className="divide-y divide-[#1e2124]">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-4 px-5 py-3 animate-pulse">
+                    <div className="w-8 h-4 bg-[#40444b] rounded" />
+                    <div className="flex-1 h-4 bg-[#40444b] rounded" />
+                    <div className="w-16 h-4 bg-[#40444b] rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : !leaderboard?.length ? (
+              <div className="text-center text-[#b9bbbe] py-10 text-sm">
+                No XP data yet — start chatting in your server to earn XP!
+              </div>
+            ) : (
+              <div className="divide-y divide-[#1e2124]">
+                {leaderboard.map((entry) => (
+                  <div key={`${entry.userId}-${entry.guildId}`} className="flex items-center gap-4 px-5 py-3">
+                    <span className="text-xl w-8 text-center flex-shrink-0">
+                      {MEDALS[entry.rank - 1] ?? `#${entry.rank}`}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-mono text-sm truncate">
+                        {entry.userId}
+                      </p>
+                      <p className="text-[#72767d] text-xs">Level {entry.level}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[#5865f2] font-bold text-sm">{entry.xp.toLocaleString()} XP</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Commands */}
         <section>
           <h2 className="text-xl font-bold mb-4 text-[#dcddde]">All Commands</h2>
-
           {cmdsLoading ? (
             <div className="grid sm:grid-cols-2 gap-4">
               {[...Array(6)].map((_, i) => (
@@ -125,10 +169,7 @@ export default function App() {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {commands.map((cmd) => (
-                      <span
-                        key={cmd}
-                        className="bg-[#40444b] text-[#dcddde] text-xs font-mono px-2 py-1 rounded"
-                      >
+                      <span key={cmd} className="bg-[#40444b] text-[#dcddde] text-xs font-mono px-2 py-1 rounded">
                         {cmd}
                       </span>
                     ))}

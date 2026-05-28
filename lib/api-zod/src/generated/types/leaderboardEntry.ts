@@ -6,7 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export * from './botCommand';
-export * from './botStats';
-export * from './healthStatus';
-export * from './leaderboardEntry';
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  guildId: string;
+  level: number;
+  xp: number;
+}

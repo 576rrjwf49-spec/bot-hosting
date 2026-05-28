@@ -10,24 +10,24 @@ export interface HealthStatus {
 }
 
 export interface BotStats {
-  /** Number of servers the bot is in */
   serverCount: number;
-  /** Bot username */
   botName: string;
-  /** Bot username with discriminator */
   botTag: string;
-  /** Whether the bot is online */
   online: boolean;
-  /** Total number of slash commands */
   commandCount: number;
 }
 
 export interface BotCommand {
-  /** Slash command name */
   name: string;
-  /** Command description */
   description: string;
-  /** Category the command belongs to */
   category: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  guildId: string;
+  level: number;
+  xp: number;
 }
 

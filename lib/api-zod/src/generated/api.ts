@@ -22,11 +22,11 @@ export const HealthCheckResponse = zod.object({
  * @summary Get bot statistics
  */
 export const GetBotStatsResponse = zod.object({
-  "serverCount": zod.number().describe('Number of servers the bot is in'),
-  "botName": zod.string().describe('Bot username'),
-  "botTag": zod.string().describe('Bot username with discriminator'),
-  "online": zod.boolean().describe('Whether the bot is online'),
-  "commandCount": zod.number().describe('Total number of slash commands')
+  "serverCount": zod.number(),
+  "botName": zod.string(),
+  "botTag": zod.string(),
+  "online": zod.boolean(),
+  "commandCount": zod.number()
 })
 
 
@@ -35,10 +35,24 @@ export const GetBotStatsResponse = zod.object({
  * @summary Get all bot commands
  */
 export const GetBotCommandsResponseItem = zod.object({
-  "name": zod.string().describe('Slash command name'),
-  "description": zod.string().describe('Command description'),
-  "category": zod.string().describe('Category the command belongs to')
+  "name": zod.string(),
+  "description": zod.string(),
+  "category": zod.string()
 })
 export const GetBotCommandsResponse = zod.array(GetBotCommandsResponseItem)
+
+
+/**
+ * Returns the top XP earners across all servers
+ * @summary Get global XP leaderboard
+ */
+export const GetLeaderboardResponseItem = zod.object({
+  "rank": zod.number(),
+  "userId": zod.string(),
+  "guildId": zod.string(),
+  "level": zod.number(),
+  "xp": zod.number()
+})
+export const GetLeaderboardResponse = zod.array(GetLeaderboardResponseItem)
 
 

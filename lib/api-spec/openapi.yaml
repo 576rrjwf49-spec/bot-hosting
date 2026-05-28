@@ -54,6 +54,21 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/BotCommand"
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [bot]
+      summary: Get global XP leaderboard
+      description: Returns the top XP earners across all servers
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
 components:
   schemas:
     HealthStatus:
@@ -68,19 +83,14 @@ components:
       properties:
         serverCount:
           type: integer
-          description: Number of servers the bot is in
         botName:
           type: string
-          description: Bot username
         botTag:
           type: string
-          description: Bot username with discriminator
         online:
           type: boolean
-          description: Whether the bot is online
         commandCount:
           type: integer
-          description: Total number of slash commands
       required:
         - serverCount
         - botName
@@ -92,14 +102,30 @@ components:
       properties:
         name:
           type: string
-          description: Slash command name
         description:
           type: string
-          description: Command description
         category:
           type: string
-          description: Category the command belongs to
       required:
         - name
         - description
         - category
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: string
+        guildId:
+          type: string
+        level:
+          type: integer
+        xp:
+          type: integer
+      required:
+        - rank
+        - userId
+        - guildId
+        - level
+        - xp

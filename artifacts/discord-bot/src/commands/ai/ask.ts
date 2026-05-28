@@ -170,7 +170,12 @@ async function tryHuggingFace(question: string): Promise<string | null> {
     const json = (await res.json()) as any;
 
     if (Array.isArray(json) && json[0]?.generated_text) {
-      return json[0].generated_text;
+      // HF returns prompt + completion concatenated — strip the prompt prefix
+      const full: string = json[0].generated_text;
+      const stripped = full.startsWith(question)
+        ? full.slice(question.length).trim()
+        : full.trim();
+      return stripped.length > 0 ? stripped : null;
     }
 
     return null;
@@ -244,26 +249,44 @@ async function tryOllama(question: string): Promise<string | null> {
 }
 
 // ───────────────── POLLINATIONS ─────────────────
+// Uses the chat-completions POST endpoint — more reliable than the GET shortcut
 
 async function tryPollinations(question: string): Promise<string | null> {
+  // Attempt 1: chat completions POST (openai model)
+  try {
+    const res = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai",
+        messages: [{ role: "user", content: question }],
+        private: true,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as {
+        choices?: { message: { content: string } }[];
+      };
+      const text = json.choices?.[0]?.message?.content?.trim();
+      if (text) return text;
+    }
+  } catch { /* fall through */ }
+
+  // Attempt 2: simple GET with mistral model as backup
   try {
     const encoded = encodeURIComponent(question);
-
     const res = await fetch(
-      `https://text.pollinations.ai/${encoded}?model=openai&seed=42&private=true`,
-      {
-        signal: AbortSignal.timeout(15_000),
-      }
+      `https://text.pollinations.ai/${encoded}?model=mistral&private=true`,
+      { signal: AbortSignal.timeout(15_000) }
     );
+    if (res.ok) {
+      const text = (await res.text()).trim();
+      if (text.length > 0) return text;
+    }
+  } catch { /* fall through */ }
 
-    if (!res.ok) return null;
-
-    const text = (await res.text()).trim();
-
-    return text.length > 0 ? text : null;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
