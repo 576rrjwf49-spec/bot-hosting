@@ -2,6 +2,15 @@ import { eq, and, desc } from "drizzle-orm";
 import { db } from "./db.js";
 import { xpTable } from "@workspace/db";
 
+// Single source of truth for level → role name mapping.
+// Role names must match exactly what's created in your Discord server.
+export const LEVEL_ROLES: Record<number, string> = {
+  5:  "Level 5",
+  10: "Level 10",
+  20: "Level 20",
+  50: "Level 50",
+};
+
 export const XP_PER_MESSAGE = 15;
 export const XP_COOLDOWN_MS = 60_000;
 const cooldowns = new Map<string, number>();

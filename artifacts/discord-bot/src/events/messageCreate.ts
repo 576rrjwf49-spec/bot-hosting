@@ -1,22 +1,44 @@
-import type { Message, Client, TextChannel } from "discord.js";
-import { addXp } from "../lib/xp.js";
+import type { Message, Client, TextChannel, GuildMember } from "discord.js";
+import { addXp, LEVEL_ROLES } from "../lib/xp.js";
 import { db } from "../lib/db.js";
 import { guildSettingsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-export async function onMessageCreate(message: Message, client: Client): Promise<void> {
-  if (message.author.bot || !message.guildId) return;
+async function assignLevelRoles(member: GuildMember, newLevel: number): Promise<void> {
+  // Award every role the member has earned up to their current level
+  const rolesToGive = Object.entries(LEVEL_ROLES)
+    .filter(([lvl]) => newLevel >= Number(lvl))
+    .map(([, name]) => name);
 
-  // Award XP
-  const result = await addXp(message.author.id, message.guildId).catch(() => null);
-  if (result?.leveled) {
-    await message.channel
-      .send(`🎉 Congrats ${message.author}, you reached **Level ${result.newLevel}**!`)
-      .catch(() => null);
+  for (const roleName of rolesToGive) {
+    const role = member.guild.roles.cache.find((r) => r.name === roleName);
+    if (role && !member.roles.cache.has(role.id)) {
+      await member.roles.add(role, `Reached level ${newLevel}`).catch(() => null);
+    }
   }
 }
 
-export async function onGuildMemberAdd(member: { guild: { id: string }; toString(): string }, client: Client): Promise<void> {
+export async function onMessageCreate(message: Message, client: Client): Promise<void> {
+  if (message.author.bot || !message.guildId) return;
+
+  const result = await addXp(message.author.id, message.guildId).catch(() => null);
+  if (!result?.leveled) return;
+
+  // Announce level-up
+  await message.channel
+    .send(`🎉 Congrats ${message.author}, you reached **Level ${result.newLevel}**!`)
+    .catch(() => null);
+
+  // Assign any earned roles
+  if (message.member) {
+    await assignLevelRoles(message.member, result.newLevel);
+  }
+}
+
+export async function onGuildMemberAdd(
+  member: { guild: { id: string }; toString(): string },
+  client: Client
+): Promise<void> {
   const settings = await db.query.guildSettingsTable
     .findFirst({ where: eq(guildSettingsTable.guildId, member.guild.id) })
     .catch(() => null);
