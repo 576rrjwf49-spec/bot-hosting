@@ -13,7 +13,7 @@ export const giphyCommand: Command = {
     const query = interaction.options.getString("search", true);
     const url = await fetchGif(query);
     if (!url) {
-      await interaction.editReply("❌ No GIF found. Add `GIPHY_API_KEY` to secrets to enable Giphy search.");
+      await interaction.editReply("❌ No GIF found for that search term. Try something different.");
       return;
     }
     const embed = new EmbedBuilder().setTitle(`🎭 Giphy: ${query}`).setImage(url).setColor(0x00ff99);
