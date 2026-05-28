@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createServer } from "http";
 import { writeFileSync } from "fs";
 import { Client, GatewayIntentBits, Partials } from "discord.js";
