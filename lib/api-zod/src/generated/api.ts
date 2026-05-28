@@ -18,7 +18,7 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Returns live Discord bot stats including server count
+ * Returns live Discord bot stats including server count and status
  * @summary Get bot statistics
  */
 export const GetBotStatsResponse = zod.object({
@@ -26,6 +26,7 @@ export const GetBotStatsResponse = zod.object({
   "botName": zod.string(),
   "botTag": zod.string(),
   "online": zod.boolean(),
+  "status": zod.enum(['online', 'maintenance', 'offline']).describe('Current bot status'),
   "commandCount": zod.number()
 })
 

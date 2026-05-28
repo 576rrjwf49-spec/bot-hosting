@@ -91,8 +91,17 @@ export default function App() {
   );
 
   const online = stats?.online ?? false;
+  const botStatus = stats?.status ?? (statsLoading ? null : "offline");
   const serverCount = stats?.serverCount ?? 0;
   const botName = stats?.botName ?? "Scary Juan";
+
+  const STATUS_CONFIG = {
+    online:      { label: "Online",            color: "text-green-400",  dot: "bg-green-400",  banner: null },
+    maintenance: { label: "Under Maintenance", color: "text-yellow-400", dot: "bg-yellow-400", banner: "bg-yellow-500/10 border-yellow-500/40 text-yellow-300" },
+    offline:     { label: "Offline",           color: "text-red-400",    dot: "bg-red-400",    banner: "bg-red-500/10 border-red-500/40 text-red-300" },
+  } as const;
+  type BotStatus = keyof typeof STATUS_CONFIG;
+  const statusCfg = STATUS_CONFIG[(botStatus as BotStatus) ?? "offline"];
 
   const categories = rawCommands
     ? Object.entries(
@@ -122,11 +131,11 @@ export default function App() {
               ) : (
                 <>
                   <span
-                    className={`w-2.5 h-2.5 rounded-full transition-opacity duration-700 ${online ? "bg-green-400" : "bg-red-400"}`}
-                    style={{ opacity: online ? (pulse ? 1 : 0.4) : 1 }}
+                    className={`w-2.5 h-2.5 rounded-full transition-opacity duration-700 ${statusCfg.dot}`}
+                    style={{ opacity: botStatus === "online" ? (pulse ? 1 : 0.4) : 1 }}
                   />
-                  <span className={`text-sm font-medium ${online ? "text-green-400" : "text-red-400"}`}>
-                    {online ? "Online" : "Offline"}
+                  <span className={`text-sm font-medium ${statusCfg.color}`}>
+                    {statusCfg.label}
                   </span>
                 </>
               )}
@@ -140,6 +149,22 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      {/* Status banner — only shown for maintenance or offline */}
+      {!statsLoading && botStatus !== "online" && statusCfg.banner && (
+        <div className={`border-b ${statusCfg.banner}`}>
+          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+            <span className="text-lg">
+              {botStatus === "maintenance" ? "🔧" : "🔴"}
+            </span>
+            <p className="text-sm font-medium">
+              {botStatus === "maintenance"
+                ? "The bot is currently under maintenance. Some features may be unavailable."
+                : "The bot is currently offline. It may be restarting or experiencing issues."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Main */}
       <main className="max-w-4xl mx-auto px-6 py-10 space-y-10">

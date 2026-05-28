@@ -31,7 +31,7 @@ paths:
       operationId: getBotStats
       tags: [bot]
       summary: Get bot statistics
-      description: Returns live Discord bot stats including server count
+      description: Returns live Discord bot stats including server count and status
       responses:
         "200":
           description: Bot statistics
@@ -89,6 +89,10 @@ components:
           type: string
         online:
           type: boolean
+        status:
+          type: string
+          enum: [online, maintenance, offline]
+          description: Current bot status
         commandCount:
           type: integer
       required:
@@ -96,6 +100,7 @@ components:
         - botName
         - botTag
         - online
+        - status
         - commandCount
     BotCommand:
       type: object

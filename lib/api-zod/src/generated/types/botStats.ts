@@ -5,11 +5,14 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { BotStatsStatus } from './botStatsStatus';
 
 export interface BotStats {
   serverCount: number;
   botName: string;
   botTag: string;
   online: boolean;
+  /** Current bot status */
+  status: BotStatsStatus;
   commandCount: number;
 }

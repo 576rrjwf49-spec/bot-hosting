@@ -9,11 +9,25 @@ export interface HealthStatus {
   status: string;
 }
 
+/**
+ * Current bot status
+ */
+export type BotStatsStatus = typeof BotStatsStatus[keyof typeof BotStatsStatus];
+
+
+export const BotStatsStatus = {
+  online: 'online',
+  maintenance: 'maintenance',
+  offline: 'offline',
+} as const;
+
 export interface BotStats {
   serverCount: number;
   botName: string;
   botTag: string;
   online: boolean;
+  /** Current bot status */
+  status: BotStatsStatus;
   commandCount: number;
 }
 

@@ -35,6 +35,7 @@ import { setcommandsCommand } from "./admin/setcommands.js";
 import { setannounceCommand } from "./admin/setannounce.js";
 import { dashboardCommand } from "./admin/dashboard.js";
 import { doublexpCommand } from "./admin/doublexp.js";
+import { setstatusCommand } from "./admin/setstatus.js";
 // Security
 import { warnCommand } from "./security/warn.js";
 import { warningsCommand } from "./security/warnings.js";
@@ -84,6 +85,7 @@ export const allCommands: Command[] = [
   setannounceCommand,
   dashboardCommand,
   doublexpCommand,
+  setstatusCommand,
   // Security
   warnCommand,
   warningsCommand,

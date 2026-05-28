@@ -8,5 +8,6 @@
 
 export * from './botCommand';
 export * from './botStats';
+export * from './botStatsStatus';
 export * from './healthStatus';
 export * from './leaderboardEntry';

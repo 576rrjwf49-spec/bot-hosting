@@ -121,7 +121,7 @@ export const getGetBotStatsUrl = () => {
 }
 
 /**
- * Returns live Discord bot stats including server count
+ * Returns live Discord bot stats including server count and status
  * @summary Get bot statistics
  */
 export const getBotStats = async ( options?: RequestInit): Promise<BotStats> => {
